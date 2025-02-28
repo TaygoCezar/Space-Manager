@@ -7,11 +7,6 @@ def criar_arquivo() -> None:
     with open(caminho, "w", encoding="utf-8") as arquivo:
         arquivo.write(",".join(campos) + "\n")
 
-linha = "01,Sala 1\n"
-linha = "01,Sala 1"
-dados = ["01", "Sala 1"]
-espaco = {"codigo": "01", "nome": "Sala 1"}
-
 def get_all() -> list:
     """Retorna uma lista com todos os espaços cadastrados.
 
@@ -43,6 +38,8 @@ def inserir_espaco(novo_espaco: dict) -> None:
         ValueError: Se o código do espaço já existir.
     """
 
+    # verificar se o código passado já existe, se sim, levanta um value erro. 
+
     if any([novo_espaco["codigo"] == espaco["codigo"] for espaco in get_all()]):
       raise ValueError(f"O código {novo_espaco["codigo"]} já existe.")
     
@@ -51,6 +48,16 @@ def inserir_espaco(novo_espaco: dict) -> None:
     #     if novo_espaco["codigo"] == espaco["codigo"]:
     #         raise ValueError(f"O código {novo_espaco["codigo"]} já existe.")
 
+    # insere uma nova linha no arquivo de espaços 
+    
     with open(caminho, "a", encoding="utf-8") as arquivo:
+        novo_espaco = {"codigo": "12", "nome": "sala 2" }
         arquivo.write(",".join([novo_espaco[campo] for campo in campos]) + "\n")
+
+        #outros modo de fazer a linha 54 
+        #nova_linha = f"{novo_espaco["codigo"]},{novo_espaco["nome"]}\n"
+        # nova_linha = novo_espaco["codigo"] + "," + novo_espaco["nome"] + "\n" 
+        # arquivo.write(nova_linha)  
         # arquivo.write(",".join(espaco.values()) + "\n")
+
+inserir_espaco 
