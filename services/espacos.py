@@ -28,21 +28,28 @@ def get_all() -> list:
         #     espacos.append(espaco)
         # return espacos
 
-def inserir_espaco(novo_espaco: dict) -> None:
+def inserir_espaco(codigo: str, nome: str) -> None: 
     """Insere um novo espaço no arquivo.
 
     Args:
-        novo_espaco (dict): Dicionário com os dados do espaço.
+        codigo (str): codigo da reserva, não pode ser o código já existente. 
+        nome (str): nome do espaço. 
 
     Raises:
         ValueError: Se o código do espaço já existir.
     """
-
     # verificar se o código passado já existe, se sim, levanta um value erro. 
 
-    if any([novo_espaco["codigo"] == espaco["codigo"] for espaco in get_all()]):
-      raise ValueError(f"O código {novo_espaco["codigo"]} já existe.")
+
+    if any([codigo == espaco["codigo"] for espaco in get_all()]):
+      raise ValueError(f"O código {codigo} já existe.") 
     
+
+
+    with open(caminho, "a", encoding="utf-8") as arquivo: 
+        arquivo.write(f"{codigo},{nome}\n") 
+
+
     # espacos = get_all()
     # for espaco in espacos:
     #     if novo_espaco["codigo"] == espaco["codigo"]:
@@ -50,9 +57,9 @@ def inserir_espaco(novo_espaco: dict) -> None:
 
     # insere uma nova linha no arquivo de espaços 
     
-    with open(caminho, "a", encoding="utf-8") as arquivo:
-        novo_espaco = {"codigo": "12", "nome": "sala 2" }
-        arquivo.write(",".join([novo_espaco[campo] for campo in campos]) + "\n")
+    # with open(caminho, "a", encoding="utf-8") as arquivo:
+    #     novo_espaco = {"codigo": "12", "nome": "sala 2" }
+    #     arquivo.write(",".join([novo_espaco[campo] for campo in campos]) + "\n")
 
         #outros modo de fazer a linha 54 
         #nova_linha = f"{novo_espaco["codigo"]},{novo_espaco["nome"]}\n"
@@ -60,4 +67,5 @@ def inserir_espaco(novo_espaco: dict) -> None:
         # arquivo.write(nova_linha)  
         # arquivo.write(",".join(espaco.values()) + "\n")
 
-inserir_espaco 
+
+    inserir_espaco("0", "mesa 9")
