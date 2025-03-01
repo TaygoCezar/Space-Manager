@@ -1,16 +1,14 @@
-caminho = "data/espacos.csv"
-campos = ["codigo", "nome"]
+caminho = "data/espacos.csv" # Caminho do arquivo onde os dados dos espaços serão armazenados
+campos = ["codigo", "nome"] # Campos que serão armazenados no arquivo
 
 def criar_arquivo() -> None:
     """Cria o arquivo onde serão armazenados os dados dos espaços.
     """
+
+    # Escreve o cabeçalho no arquivo, mesmo que ele já exista
     with open(caminho, "w", encoding="utf-8") as arquivo:
         arquivo.write(",".join(campos) + "\n")
 
-linha = "01,Sala 1\n"
-linha = "01,Sala 1"
-dados = ["01", "Sala 1"]
-espaco = {"codigo": "01", "nome": "Sala 1"}
 
 def get_all() -> list:
     """Retorna uma lista com todos os espaços cadastrados.
@@ -19,38 +17,26 @@ def get_all() -> list:
         list: Lista com todos os espaços cadastrados.
     """
 
+    # Abre o arquivo e lê todas as linhas, exceto a primeira que é o cabeçalho, e cria um dicionário para cada linha
     with open(caminho, "r", encoding="utf-8") as arquivo:
         return [dict(zip(campos, linha.strip().split(","))) for linha in arquivo.readlines()[1:]]
-        
-        # espacos = []
 
-        # linhas = arquivo.readlines()
-        # for linha in linhas[1:]:
-        #     linha = linha.strip()
-        #     dados = linha.split(",")
 
-        #     espaco = dict(zip(campos, dados))
-        #     espacos.append(espaco)
-        # return espacos
-
-def inserir_espaco(novo_espaco: dict) -> None:
+def inserir(codigo: str, nome: str) -> None:
     """Insere um novo espaço no arquivo.
 
     Args:
-        novo_espaco (dict): Dicionário com os dados do espaço.
+        codigo (str): codigo do espaço.
+        nome (str): nome do espaço
 
     Raises:
         ValueError: Se o código do espaço já existir.
     """
 
-    if any([novo_espaco["codigo"] == espaco["codigo"] for espaco in get_all()]):
-      raise ValueError(f"O código {novo_espaco["codigo"]} já existe.")
-    
-    # espacos = get_all()
-    # for espaco in espacos:
-    #     if novo_espaco["codigo"] == espaco["codigo"]:
-    #         raise ValueError(f"O código {novo_espaco["codigo"]} já existe.")
+    # Verifica se o código já existe, caso exista, levanta um ValueError
+    if any([codigo == espaco["codigo"] for espaco in get_all()]):
+      raise ValueError(f"O código {codigo} já existe.")
 
+    # Insere o novo espaço no arquivo
     with open(caminho, "a", encoding="utf-8") as arquivo:
-        arquivo.write(",".join([novo_espaco[campo] for campo in campos]) + "\n")
-        # arquivo.write(",".join(espaco.values()) + "\n")
+        arquivo.write(f"{codigo},{nome}\n")
