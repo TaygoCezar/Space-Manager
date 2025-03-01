@@ -27,7 +27,7 @@ def inserir(codigo: str, nome: str) -> None:
 
     Args:
         codigo (str): codigo do espaço.
-        nome (str): nome do espaço
+        nome (str): nome do espaço.
 
     Raises:
         ValueError: Se o código do espaço já existir.
