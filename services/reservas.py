@@ -1,4 +1,7 @@
-from utils.data import validar_datas, validar_intervalo, validar_reservas
+import sys
+sys.path.insert(0, r"C:\Users\taygo\Downloads\PASTA DE TESTE\utils")
+
+from data import validar_datas, validar_intervalo, validar_reservas
 
 caminho = "data/reservas.csv" # Caminho do arquivo onde os dados das reservas serão armazenados 
 campos = ["codigo-espaco", "dono-reserva", "datah-inicio","datah-fim"] # Campos que serão armazenados no arquivo
@@ -59,4 +62,8 @@ def inserir(codigo_espaco: str, dono_reserva: str, datah_inicio: str, datah_fim:
         arquivo.write(f"{codigo_espaco},{dono_reserva},{datah_inicio},{datah_fim}\n")
 
 
-inserir("1", "João", "2021-10-10 10:00", "2021-10-10 11:00")
+# inserir("1", "João", "2021-10-10 10:00", "2021-10-10 11:00")
+# inserir("1", "João", "2025-10-10 12:00", "2025-10-10 12:15")
+# inserir("1", "João", "2025-10-10 12:00", "2025-10-10 12:45")
+# inserir("1", "João", "2025-10-10 12:00", "2025-10-10 12:45")
+# inserir("6", "João", "2025-10-10 12:00", "2025-10-10 12:45")
