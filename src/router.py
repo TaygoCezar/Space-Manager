@@ -1,9 +1,9 @@
-from flet import Page
-from flet import RouteChangeEvent
+import flet as ft
 
-from routes.home import home
+# Páginas da aplicação
+from routes.reservas import reservas
 
-def init(p: Page) -> None:
+def init(p: ft.Page) -> None:
     """Inicialização das páginas da aplicação.
     
     Args:
@@ -11,13 +11,14 @@ def init(p: Page) -> None:
     """
     global page, routes
     page = p
+    page.on_route_change = navigate
 
     # Rotas
     routes = {
-        "home": home(page)
+        "reservas": reservas()
     }    
     
-def navigate(e: RouteChangeEvent) -> None:
+def navigate(e: ft.RouteChangeEvent) -> None:
     """Gerencia a navegação entre as páginas da aplicação.
 
     Args:
