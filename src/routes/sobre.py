@@ -6,10 +6,10 @@ import flet as ft
 # Componentes Personalizados
 from components.navbar import navbar
 
-def reservas():
+def sobre():
     return ft.View(
         controls=[
-            navbar("reservas")
+            navbar("sobre")
         ],
         **styles["body"]
     )

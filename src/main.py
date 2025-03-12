@@ -9,6 +9,9 @@ def main(page: ft.Page) -> None:
     router.init(page)
     page.title = "Space Manager"
     page.theme_mode = "light"
+    page.theme = ft.Theme(
+        page_transitions=ft.PageTransitionsTheme(windows=ft.PageTransitionTheme.NONE)
+    )
 
     page.fonts = {
         "Saira Extra Condensed - Bold": "/fonts/SairaExtraCondensed-Bold.ttf"
