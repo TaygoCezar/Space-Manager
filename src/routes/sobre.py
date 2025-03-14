@@ -7,7 +7,10 @@ import flet as ft
 from components.navbar import navbar
 
 def sobre():
-    return ft.View(
+    def init():
+        pass
+
+    return init, ft.View(
         controls=[
             navbar("sobre")
         ],

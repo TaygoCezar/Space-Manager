@@ -7,7 +7,10 @@ import flet as ft
 from components.navbar import navbar
 
 def espacos():
-    return ft.View(
+    def init():
+        pass
+
+    return init, ft.View(
         controls=[
             navbar("espacos")
         ],
@@ -19,3 +22,4 @@ styles = {
         "padding": ft.padding.all(0),
     }
 }
+

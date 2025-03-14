@@ -17,7 +17,7 @@ def init(p: ft.Page) -> None:
 
     # Rotas
     routes = {
-        "reservas": reservas(),
+        "reservas": reservas(page), # -> (init, view)
         "espacos": espacos(),
         "sobre": sobre()
     }    
@@ -33,5 +33,6 @@ def navigate(e: ft.RouteChangeEvent) -> None:
         raise ValueError(f"Rota {e.route} não encontrada.")
         
     page.views.clear()
-    page.views.append(routes[e.route])
+    routes[e.route][0]() # -> chama a função init da rota
+    page.views.append(routes[e.route][1])
     page.update()
