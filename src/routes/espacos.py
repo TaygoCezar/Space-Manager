@@ -6,7 +6,7 @@ import flet as ft
 # Componentes Personalizados
 from components.navbar import navbar
 
-def espacos():
+def espacos(page: ft.Page):
     def init():
         pass
 

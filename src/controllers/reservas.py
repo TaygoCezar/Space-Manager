@@ -10,8 +10,6 @@ from utils.search import prefix_check
 
 from services.reservas import get_all
 
-rows_per_page = 8
-
 def categorize_intervals(reservas: list) -> list:
     def f(reserva):
         reserva["status"] = categorize_interval(reserva["inicio"], reserva["fim"]) # -> "gone", "on going", "scheduled"
@@ -58,7 +56,7 @@ def select(reservas: list, mode: str) -> list:
     
     return list(filter(f, reservas))
 
-def get_data_rows(key: str, mode: str) -> list:
+def get_reservas(key: str, mode: str) -> list:
     # Carregar dados
     reservas = get_all()
 
@@ -70,14 +68,14 @@ def get_data_rows(key: str, mode: str) -> list:
 
     return reservas
 
-def get_rows(reservas, page) -> list:
+def render_reservas(reservas, number_of_page, rows_per_page, on_delete) -> list:
     status_colors = {
         "Finalizada": "#E0E3E8",
         "Em andamento": "#2B6AB1",
         "Agendada": "#2BA850",
     }
 
-    start = page * rows_per_page
+    start = number_of_page * rows_per_page
     end = start + rows_per_page
 
     return [
@@ -92,7 +90,7 @@ def get_rows(reservas, page) -> list:
                 ft.DataCell(
                     ft.Row([
                         ft.IconButton(ft.Icons.EDIT),
-                        ft.IconButton(ft.Icons.DELETE)
+                        ft.IconButton(ft.Icons.DELETE, key=reserva["id"], on_click=lambda e: on_delete(e.control.key))
                     ], **styles["data-cell-row"])
                 )  
             ]
@@ -100,43 +98,9 @@ def get_rows(reservas, page) -> list:
         for reserva in reservas[start:end]
     ]
 
-def get_pages(data, selected_page, goto_page):
-    number_of_rows = len(data)
-    number_of_pages = max(1, math.ceil(number_of_rows / rows_per_page))
-
-    rows = []
-    for i in range(number_of_pages):
-        row = ft.Container(
-            ft.Text(i+1, **styles["pagination-text"]),
-            bgcolor="#E1E1E1" if i == selected_page else "transparent",
-            **styles["pagination-button"],
-            key=f"page-{i}",
-            data=i,
-            on_click=lambda e: goto_page(e.control.data)
-        )
-    
-        rows.append(row)
-
-    return rows
-
-def get_max_page(data):
-    number_of_rows = len(data)
-    return max(1, math.ceil(number_of_rows / rows_per_page)) - 1
-
 styles = {
     "data-cell-row": {
         "alignment": ft.MainAxisAlignment.CENTER,
         "spacing": 0
-    },
-
-    "pagination-button": {
-        "height": 40,
-        "width": 40,
-        "alignment": ft.alignment.center,
-        "ink": True
-    },
-    "pagination-text": {
-        "color": "#003565",
-        "weight": ft.FontWeight.BOLD
     }
 }

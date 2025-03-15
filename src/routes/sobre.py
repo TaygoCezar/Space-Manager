@@ -6,7 +6,7 @@ import flet as ft
 # Componentes Personalizados
 from components.navbar import navbar
 
-def sobre():
+def sobre(page: ft.Page):
     def init():
         pass
 

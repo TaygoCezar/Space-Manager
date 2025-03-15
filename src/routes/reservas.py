@@ -1,46 +1,31 @@
 import sys, pathlib
-from turtle import goto, width
 sys.path.insert(0, pathlib.Path(__file__).parent.parent)
 
 import flet as ft
-import math
 
 # Controladores
-from controllers.reservas import get_data_rows, get_pages, get_rows, get_max_page
+from controllers.reservas import get_reservas, render_reservas
 
 # Componentes Personalizados
 from components.navbar import navbar
+from components.table import table
+from components.delete_modal import open_delete_modal
 
 def reservas(page: ft.Page):
-    table_ref = ft.Ref[ft.DataTable]()
-
     dropdown_ref = ft.Ref[ft.DropdownM2]()
     search_ref = ft.Ref[ft.TextField]()
 
-    pagination_ref = ft.Ref[ft.Row]()
-    page_number_ref = ft.Ref[int]()
-    page_number_ref.current = 0
+    goto_page, table_component = table(
+        get_data=get_reservas,
+        get_data_parameters={"key": search_ref, "mode": dropdown_ref},
+        render_data=render_reservas,
+        columns = [ "CÓDIGO DO ESPAÇO", "ESPAÇO", "DONO", "INÍCIO", "FIM", "ESTADO", ""],
+        page=page,
+        on_delete=lambda id: open_delete_modal(id, page, lambda: goto_page(0)),
+    )
 
     def init():
         goto_page(0, False)
-
-    def goto_page(page_number, scroll=True):
-        data = get_data_rows(search_ref.current.value, dropdown_ref.current.value)
-        
-        max_page = get_max_page(data)
-        
-        page_number = max(0, page_number)
-        page_number = min(max_page, page_number)
-
-        page_number_ref.current = page_number
-        table_ref.current.rows = get_rows(data, page_number_ref.current)
-        pagination_ref.current.controls = get_pages(data, page_number_ref.current, goto_page)
-        pagination_ref.current.width = min(500, len(pagination_ref.current.controls) * pagination_ref.current.controls[0].width)
-
-        if scroll:
-            pagination_ref.current.scroll_to(key=f"page-{page_number_ref.current}")
-
-        page.update()
 
     return init, ft.View(
         controls=[
@@ -67,32 +52,7 @@ def reservas(page: ft.Page):
                         ft.TextField(ref=search_ref, hint_text="Buscar", on_change=lambda e: goto_page(0), **styles["search"])
                     ]),
 
-                    # Tabela
-                    ft.DataTable(
-                        ref=table_ref,
-                        columns=[
-                            ft.DataColumn(ft.Text("CÓDIDO DO ESPAÇO"), heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("ESPAÇO"), heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("DONO"),heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("INÍCIO"),heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("FIM"),heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("ESTADO"),heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text(""),heading_row_alignment=ft.MainAxisAlignment.CENTER)                       
-                        ],
-                        **styles["table"]
-                    ),
-
-                    ft.Container(
-                        ft.Row(
-                            [
-                                ft.IconButton(ft.Icons.CHEVRON_LEFT, tooltip="Anterior", on_click=lambda e: goto_page(page_number_ref.current - 1)),
-                                ft.Row(ref=pagination_ref, **styles["pagination-pages"]),
-                                ft.IconButton(ft.Icons.CHEVRON_RIGHT, tooltip="Próxima", on_click=lambda e: goto_page(page_number_ref.current + 1))
-                            ],
-                            **styles["pagination-row"]
-                        ),
-                        **styles["pagination-container"]
-                    )
+                    table_component
                 ]),
                 **styles["main-container"]
             ),
@@ -147,45 +107,5 @@ styles = {
         "border_width": 1.5, 
         "suffix_icon": ft.Icon(ft.Icons.SEARCH, color="#003565"),
         "hint_style": ft.TextStyle(color="#4F7495")
-    },
-
-    "table": {
-        "width": float("inf"),
-        "border": ft.border.all(1, "#E0E3E8"),
-        
-        # Estilos Header
-        "heading_row_height": 50,
-        "heading_row_color": "#ECF0F3",
-        "heading_text_style": ft.TextStyle(
-            color="#556064",
-            size=12,
-            weight=ft.FontWeight.BOLD
-        ),
-
-        # Estilos Body
-        "horizontal_lines": ft.BorderSide(
-            color="#E0E3E8",
-            width=1
-        ),
-
-        "data_row_min_height": 45,
-        "data_row_max_height": 45,
-        "data_text_style": ft.TextStyle(
-            color="#959896",
-            weight=ft.FontWeight.BOLD
-        )
-    },
-    
-    "pagination-container": {
-        "border": ft.border.all(1, "#E0E3E8"),
-    },
-    "pagination-row": {
-        "alignment": ft.MainAxisAlignment.CENTER
-    },
-    "pagination-pages": {
-        "width": 500,
-        "spacing": 0,
-        "alignment": ft.MainAxisAlignment.CENTER,
-        "scroll": ft.ScrollMode.AUTO
     }
 }   
