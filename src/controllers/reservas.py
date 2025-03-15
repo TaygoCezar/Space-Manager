@@ -6,7 +6,36 @@ import flet as ft
 from utils.data import format_date, categorize_interval
 from utils.search import ignore_case, ignore_accent_marks, prefix_check
 
+def search(reservas: list, key: str) -> list:
+    def f(reserva: dict) -> bool:
+        for value in reserva.values():
+            if key 
+
+    nova_reservas = []
+
+    for reserva in reservas:
+        if f(reserva):
+            nova_reservas.append(reserva)
+    
+    return nova_reservas
+
+def categorize_intervals(reservas: list) -> list:
+    def f(reserva):
+        reserva["status"] = categorize_interval(reserva["inicio"], reserva["fim"]) # -> "gone", "on going", "scheduled"
+        return reserva
+
+    return list(map(f, reservas))
+
+def format_dates(reservas: list) -> list:
+    def f(reserva): 
+        reserva["inicio"] = format_date(reserva["inicio"])
+        reserva["fim"] = format_date(reserva["fim"])
+        return reserva
+    
+    return list(map(f, reservas))
+
 def get_rows(filter_key: str, filter_mode: str) -> list:
+    # Carregar dados
     reservas = [
         {"id": "1", "codigo-espaco": "sala-01", "nome-espaco": "Sala 01", "dono": "Nathielly", "inicio": "2025-03-13 13:00", "fim": "2025-03-17 14:00"},
         {"id": "2", "codigo-espaco": "sala-02", "nome-espaco": "Sala 02", "dono": "Murilo", "inicio": "2025-03-11 14:00", "fim": "2025-03-11 15:00"},
@@ -36,8 +65,7 @@ def get_rows(filter_key: str, filter_mode: str) -> list:
     for reserva in reservas:
         status = categorize_interval(reserva["inicio"], reserva["fim"])
 
-        reserva["inicio"] = format_date(reserva["inicio"])
-        reserva["fim"] = format_date(reserva["fim"])
+        reserva = format_dates(reserva)
 
         if not filter_any(reserva):
             continue
