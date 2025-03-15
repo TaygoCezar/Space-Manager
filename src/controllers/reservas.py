@@ -2,22 +2,15 @@ import sys, pathlib
 sys.path.insert(0, pathlib.Path(__file__).parent.parent)
 
 import flet as ft
+import math
+from datetime import datetime as dt
 
 from utils.data import format_date, categorize_interval
-from utils.search import ignore_case, ignore_accent_marks, prefix_check
+from utils.search import prefix_check
 
-def search(reservas: list, key: str) -> list:
-    def f(reserva: dict) -> bool:
-        for value in reserva.values():
-            if key 
+from services.reservas import get_all
 
-    nova_reservas = []
-
-    for reserva in reservas:
-        if f(reserva):
-            nova_reservas.append(reserva)
-    
-    return nova_reservas
+rows_per_page = 8
 
 def categorize_intervals(reservas: list) -> list:
     def f(reserva):
@@ -25,6 +18,17 @@ def categorize_intervals(reservas: list) -> list:
         return reserva
 
     return list(map(f, reservas))
+
+
+def sort_reservas(reservas: list) -> list:
+    now = dt.now()
+
+    def f(reserva):
+        return abs(dt.strptime(reserva["inicio"], "%Y-%m-%d %H:%M") - now)
+    
+    reservas.sort(key=f)
+    return reservas
+
 
 def format_dates(reservas: list) -> list:
     def f(reserva): 
@@ -34,71 +38,105 @@ def format_dates(reservas: list) -> list:
     
     return list(map(f, reservas))
 
-def get_rows(filter_key: str, filter_mode: str) -> list:
-    # Carregar dados
-    reservas = [
-        {"id": "1", "codigo-espaco": "sala-01", "nome-espaco": "Sala 01", "dono": "Nathielly", "inicio": "2025-03-13 13:00", "fim": "2025-03-17 14:00"},
-        {"id": "2", "codigo-espaco": "sala-02", "nome-espaco": "Sala 02", "dono": "Murilo", "inicio": "2025-03-11 14:00", "fim": "2025-03-11 15:00"},
-        {"id": "3", "codigo-espaco": "sala-03", "nome-espaco": "Sala 03", "dono": "Predo", "inicio": "2025-03-11 15:00", "fim": "2025-03-11 16:00"},
-        {"id": "4", "codigo-espaco": "sala-04", "nome-espaco": "Sala 04", "dono": "Talizo", "inicio": "2025-03-11 16:00", "fim": "2025-03-11 17:00"},
-    ]
 
-    rows = []
-    statuses = {
-        "gone": ("Finalizada", "#E0E3E8"),
-        "on going": ("Em andamento", "#2B6AB1"),
-        "scheduled": ("Agendada", "#2BA850"),
-    }
-
-    filter_key = ignore_case(filter_key)
-    filter_key = ignore_accent_marks(filter_key)
-
-    def filter_any(reserva):
+def search(reservas: list, key: str) -> list:
+    def f(reserva: dict) -> bool:
         for value in reserva.values():
-            value = ignore_case(value)
-            value = ignore_accent_marks(value)
-
-            if prefix_check(value, filter_key):
+            if prefix_check(value, key): 
                 return True
         return False
 
-    for reserva in reservas:
-        status = categorize_interval(reserva["inicio"], reserva["fim"])
+    return list(filter(f, reservas))
 
-        reserva = format_dates(reserva)
 
-        if not filter_any(reserva):
-            continue
+def select(reservas: list, mode: str) -> list:
+    if mode == "all":
+        return reservas
+    
+    def f(reserva: dict) -> bool:
+        return reserva["status"] != "Finalizada"
+    
+    return list(filter(f, reservas))
 
-        if filter_mode == "next" and status == "gone":
-            continue
+def get_data_rows(key: str, mode: str) -> list:
+    # Carregar dados
+    reservas = get_all()
 
-        status_name, status_color = statuses[status]
+    reservas = categorize_intervals(reservas) # Cria o campos "status"
+    reservas = sort_reservas(reservas)
+    reservas = format_dates(reservas) # Transforma as datas em strings formatadas
+    reservas = search(reservas, key) # Filtra as reservas com base no campo de busca
+    reservas = select(reservas, mode) # Filtra as reservas com base no modo de visualização selecionado
 
-        row = ft.DataRow(
+    return reservas
+
+def get_rows(reservas, page) -> list:
+    status_colors = {
+        "Finalizada": "#E0E3E8",
+        "Em andamento": "#2B6AB1",
+        "Agendada": "#2BA850",
+    }
+
+    start = page * rows_per_page
+    end = start + rows_per_page
+
+    return [
+        ft.DataRow(
             cells=[
                 ft.DataCell(ft.Row([ft.Text(reserva["codigo-espaco"])], **styles["data-cell-row"])),
                 ft.DataCell(ft.Row([ft.Text(reserva["nome-espaco"])], **styles["data-cell-row"])),
                 ft.DataCell(ft.Row([ft.Text(reserva["dono"])], **styles["data-cell-row"])),
                 ft.DataCell(ft.Row([ft.Text(reserva["inicio"])], **styles["data-cell-row"])),
                 ft.DataCell(ft.Row([ft.Text(reserva["fim"])], **styles["data-cell-row"])),
-                ft.DataCell(ft.Row([ft.Icon(ft.Icons.CIRCLE, color=status_color, tooltip=status_name)], **styles["data-cell-row"])),
+                ft.DataCell(ft.Row([ft.Icon(ft.Icons.CIRCLE, color=status_colors[reserva["status"]], tooltip=reserva["status"])], **styles["data-cell-row"])),
                 ft.DataCell(
                     ft.Row([
                         ft.IconButton(ft.Icons.EDIT),
                         ft.IconButton(ft.Icons.DELETE)
                     ], **styles["data-cell-row"])
                 )  
-            ],
+            ]
         )
+        for reserva in reservas[start:end]
+    ]
 
-        rows.append(row)
+def get_pages(data, selected_page, goto_page):
+    number_of_rows = len(data)
+    number_of_pages = max(1, math.ceil(number_of_rows / rows_per_page))
+
+    rows = []
+    for i in range(number_of_pages):
+        row = ft.Container(
+            ft.Text(i+1, **styles["pagination-text"]),
+            bgcolor="#E1E1E1" if i == selected_page else "transparent",
+            **styles["pagination-button"],
+            key=f"page-{i}",
+            data=i,
+            on_click=lambda e: goto_page(e.control.data)
+        )
     
+        rows.append(row)
+
     return rows
+
+def get_max_page(data):
+    number_of_rows = len(data)
+    return max(1, math.ceil(number_of_rows / rows_per_page)) - 1
 
 styles = {
     "data-cell-row": {
         "alignment": ft.MainAxisAlignment.CENTER,
         "spacing": 0
+    },
+
+    "pagination-button": {
+        "height": 40,
+        "width": 40,
+        "alignment": ft.alignment.center,
+        "ink": True
+    },
+    "pagination-text": {
+        "color": "#003565",
+        "weight": ft.FontWeight.BOLD
     }
 }
