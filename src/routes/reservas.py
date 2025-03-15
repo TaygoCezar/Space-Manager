@@ -38,7 +38,7 @@ def reservas(page: ft.Page):
 
                     # Controles
                     ft.Row([
-                        ft.FilledButton("Adicionar Reserva", "add", **styles["filled-button"]),
+                        ft.FilledButton("Adicionar Reserva", "add", on_click=lambda e: page.go("reservas_adicionar"), **styles["filled-button"]),
                         ft.DropdownM2(
                             ref=dropdown_ref,
                             options=[

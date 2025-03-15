@@ -18,6 +18,7 @@ import flet as ft
 from routes.reservas import reservas
 from routes.espacos import espacos
 from routes.sobre import sobre
+from routes.reservas_adicionar import reservas_adicionar
 
 def init(p: ft.Page) -> None:
     """Inicialização das páginas da aplicação.
@@ -33,7 +34,8 @@ def init(p: ft.Page) -> None:
     routes = {
         "reservas": reservas(page),
         "espacos": espacos(page),
-        "sobre": sobre(page)
+        "sobre": sobre(page),
+        "reservas_adicionar": reservas_adicionar(page)
     }    
     
 def navigate(e: ft.RouteChangeEvent) -> None:
