@@ -2,22 +2,12 @@ import sys, pathlib
 sys.path.insert(0, pathlib.Path(__file__).parent.parent)
 
 import flet as ft
+from datetime import datetime as dt
 
 from utils.data import format_date, categorize_interval
-from utils.search import ignore_case, ignore_accent_marks, prefix_check
+from utils.search import prefix_check
 
-def search(reservas: list, key: str) -> list:
-    def f(reserva: dict) -> bool:
-        for value in reserva.values():
-            if key 
-
-    nova_reservas = []
-
-    for reserva in reservas:
-        if f(reserva):
-            nova_reservas.append(reserva)
-    
-    return nova_reservas
+from services.reservas import get_all
 
 def categorize_intervals(reservas: list) -> list:
     def f(reserva):
@@ -25,6 +15,17 @@ def categorize_intervals(reservas: list) -> list:
         return reserva
 
     return list(map(f, reservas))
+
+
+def sort_reservas(reservas: list) -> list:
+    now = dt.now()
+
+    def f(reserva):
+        return abs(dt.strptime(reserva["inicio"], "%Y-%m-%d %H:%M") - now)
+    
+    reservas.sort(key=f)
+    return reservas
+
 
 def format_dates(reservas: list) -> list:
     def f(reserva): 
@@ -34,67 +35,67 @@ def format_dates(reservas: list) -> list:
     
     return list(map(f, reservas))
 
-def get_rows(filter_key: str, filter_mode: str) -> list:
-    # Carregar dados
-    reservas = [
-        {"id": "1", "codigo-espaco": "sala-01", "nome-espaco": "Sala 01", "dono": "Nathielly", "inicio": "2025-03-13 13:00", "fim": "2025-03-17 14:00"},
-        {"id": "2", "codigo-espaco": "sala-02", "nome-espaco": "Sala 02", "dono": "Murilo", "inicio": "2025-03-11 14:00", "fim": "2025-03-11 15:00"},
-        {"id": "3", "codigo-espaco": "sala-03", "nome-espaco": "Sala 03", "dono": "Predo", "inicio": "2025-03-11 15:00", "fim": "2025-03-11 16:00"},
-        {"id": "4", "codigo-espaco": "sala-04", "nome-espaco": "Sala 04", "dono": "Talizo", "inicio": "2025-03-11 16:00", "fim": "2025-03-11 17:00"},
-    ]
 
-    rows = []
-    statuses = {
-        "gone": ("Finalizada", "#E0E3E8"),
-        "on going": ("Em andamento", "#2B6AB1"),
-        "scheduled": ("Agendada", "#2BA850"),
-    }
-
-    filter_key = ignore_case(filter_key)
-    filter_key = ignore_accent_marks(filter_key)
-
-    def filter_any(reserva):
+def search(reservas: list, key: str) -> list:
+    def f(reserva: dict) -> bool:
         for value in reserva.values():
-            value = ignore_case(value)
-            value = ignore_accent_marks(value)
-
-            if prefix_check(value, filter_key):
+            if prefix_check(value, key): 
                 return True
         return False
 
-    for reserva in reservas:
-        status = categorize_interval(reserva["inicio"], reserva["fim"])
+    return list(filter(f, reservas))
 
-        reserva = format_dates(reserva)
 
-        if not filter_any(reserva):
-            continue
+def select(reservas: list, mode: str) -> list:
+    if mode == "all":
+        return reservas
+    
+    def f(reserva: dict) -> bool:
+        return reserva["status"] != "Finalizada"
+    
+    return list(filter(f, reservas))
 
-        if filter_mode == "next" and status == "gone":
-            continue
+def get_reservas(key: str, mode: str) -> list:
+    # Carregar dados
+    reservas = get_all()
 
-        status_name, status_color = statuses[status]
+    reservas = categorize_intervals(reservas) # Cria o campos "status"
+    reservas = sort_reservas(reservas)
+    reservas = format_dates(reservas) # Transforma as datas em strings formatadas
+    reservas = search(reservas, key) # Filtra as reservas com base no campo de busca
+    reservas = select(reservas, mode) # Filtra as reservas com base no modo de visualização selecionado
 
-        row = ft.DataRow(
+    return reservas
+
+def render_reservas(reservas, number_of_page, rows_per_page, on_edit, on_delete) -> list:
+    status_colors = {
+        "Finalizada": "#E0E3E8",
+        "Em andamento": "#2B6AB1",
+        "Agendada": "#2BA850",
+    }
+
+    start = number_of_page * rows_per_page
+    end = start + rows_per_page
+
+    return [
+        ft.DataRow(
             cells=[
                 ft.DataCell(ft.Row([ft.Text(reserva["codigo-espaco"])], **styles["data-cell-row"])),
                 ft.DataCell(ft.Row([ft.Text(reserva["nome-espaco"])], **styles["data-cell-row"])),
                 ft.DataCell(ft.Row([ft.Text(reserva["dono"])], **styles["data-cell-row"])),
                 ft.DataCell(ft.Row([ft.Text(reserva["inicio"])], **styles["data-cell-row"])),
                 ft.DataCell(ft.Row([ft.Text(reserva["fim"])], **styles["data-cell-row"])),
-                ft.DataCell(ft.Row([ft.Icon(ft.Icons.CIRCLE, color=status_color, tooltip=status_name)], **styles["data-cell-row"])),
+                ft.DataCell(ft.Row([ft.Icon(ft.Icons.CIRCLE, color=status_colors[reserva["status"]], tooltip=reserva["status"])], **styles["data-cell-row"])),
                 ft.DataCell(
                     ft.Row([
-                        ft.IconButton(ft.Icons.EDIT),
-                        ft.IconButton(ft.Icons.DELETE)
+                        ft.IconButton(ft.Icons.EDIT, tooltip="Editar", key=reserva["id"], on_click=lambda e: on_edit(e.control.key)),
+                        ft.IconButton(ft.Icons.DELETE, tooltip="Deletar", key=reserva["id"], on_click=lambda e: on_delete(e.control.key))
                     ], **styles["data-cell-row"])
                 )  
-            ],
+            ]
         )
-
-        rows.append(row)
-    
-    return rows
+        for reserva in reservas[start:end]
+    ]
 
 styles = {
     "data-cell-row": {

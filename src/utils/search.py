@@ -15,4 +15,6 @@ def ignore_accent_marks(s: str) -> str:
     return s
 
 def prefix_check(s: str, prefix: str) -> bool:
+    prefix = ignore_accent_marks(ignore_case(prefix))
+    s = ignore_accent_marks(ignore_case(s))
     return s.startswith(prefix)

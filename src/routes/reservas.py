@@ -4,23 +4,31 @@ sys.path.insert(0, pathlib.Path(__file__).parent.parent)
 import flet as ft
 
 # Controladores
-from controllers.reservas import get_rows
+from controllers.reservas import get_reservas, render_reservas
 
 # Componentes Personalizados
 from components.navbar import navbar
+from components.table import table
+from components.delete_reserva_modal import open_delete_modal
 
 def reservas(page: ft.Page):
-    table_ref = ft.Ref[ft.DataTable]()
-
     dropdown_ref = ft.Ref[ft.DropdownM2]()
     search_ref = ft.Ref[ft.TextField]()
 
-    def init():
-        update_rows()
+    goto_page, table_component = table(
+        get_data=get_reservas,
+        get_data_parameters={"key": search_ref, "mode": dropdown_ref},
+        render_data=render_reservas,
+        columns = ["CÓDIGO DO ESPAÇO", "ESPAÇO", "DONO", "INÍCIO", "FIM", "ESTADO", ""],
+        page=page,
+        on_edit=lambda id: page.go(f"reservas_editar", id=id),
+        on_delete=lambda id: open_delete_modal(id, page, lambda: goto_page(0)),
+    )
 
-    def update_rows():
-        table_ref.current.rows = get_rows(search_ref.current.value, dropdown_ref.current.value)
-        page.update()
+    def init():
+        search_ref.current.value = ""
+        dropdown_ref.current.value = "next"
+        goto_page(0, False)
 
     return init, ft.View(
         controls=[
@@ -33,7 +41,7 @@ def reservas(page: ft.Page):
 
                     # Controles
                     ft.Row([
-                        ft.FilledButton("Adicionar Reserva", "add", **styles["filled-button"]),
+                        ft.FilledButton("Adicionar Reserva", "add", on_click=lambda e: page.go("reservas_adicionar"), **styles["filled-button"]),
                         ft.DropdownM2(
                             ref=dropdown_ref,
                             options=[
@@ -41,37 +49,19 @@ def reservas(page: ft.Page):
                                 ft.DropdownOption("all", "Mostrar todos")                                
                             ],
                             value="next",
-                            on_change=lambda e: update_rows(),
+                            on_change=lambda e: goto_page(0),
                             **styles["dropdown"]
                         ),
-                        ft.TextField(ref=search_ref, hint_text="Buscar", on_change=lambda e: update_rows(), **styles["search"])
+                        ft.TextField(ref=search_ref, hint_text="Buscar", on_change=lambda e: goto_page(0), **styles["search"])
                     ]),
 
-                    # Tabela
-                    ft.DataTable(
-                        ref=table_ref,
-                        columns=[
-                            ft.DataColumn(ft.Text("CÓDIDO DO ESPAÇO"), heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("ESPAÇO"), heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("DONO"),heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("INÍCIO"),heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("FIM"),heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text("ESTADO"),heading_row_alignment=ft.MainAxisAlignment.CENTER),
-                            ft.DataColumn(ft.Text(""),heading_row_alignment=ft.MainAxisAlignment.CENTER)                       
-                        ],
-                        **styles["table"]
-                    )
+                    table_component
                 ]),
                 **styles["main-container"]
             ),
         ],
         **styles["body"]
     )
-
-
-
-
-
 
 styles = {
     "body": {
@@ -80,9 +70,6 @@ styles = {
     
     "main-container": {
         "padding":ft.padding.symmetric(25,25) 
-    },
-    
-    "main-row": {
     },
     
     "header": {
@@ -123,28 +110,5 @@ styles = {
         "border_width": 1.5, 
         "suffix_icon": ft.Icon(ft.Icons.SEARCH, color="#003565"),
         "hint_style": ft.TextStyle(color="#4F7495")
-    },
-
-    "table": {
-        "width": float("inf"),
-        "border": ft.border.all(1, "#E0E3E8"),
-        
-        # Estilos Header
-        "heading_row_color": "#ECF0F3",
-        "heading_text_style": ft.TextStyle(
-            color="#556064",
-            size=12,
-            weight=ft.FontWeight.BOLD
-        ),
-        
-        # Estilos Body
-        "horizontal_lines": ft.BorderSide(
-            color="#E0E3E8",
-            width=1
-        ),
-        "data_text_style": ft.TextStyle(
-            color="#959896",
-            weight=ft.FontWeight.BOLD
-        )
     }
 }   

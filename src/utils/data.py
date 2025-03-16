@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime as dt
 
 def format_date(date_str: str) -> str:
-    date = datetime.strptime(date_str, "%Y-%m-%d %H:%M")
+    date = dt.strptime(date_str, "%Y-%m-%d %H:%M")
     
     months = [ "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
     
@@ -9,16 +9,16 @@ def format_date(date_str: str) -> str:
     return date.strftime(f"%d de {month} de %Y, %H:%M")
 
 def categorize_interval(start_str: str, end_str: str) -> str:
-    start = datetime.strptime(start_str, "%Y-%m-%d %H:%M")
-    end = datetime.strptime(end_str, "%Y-%m-%d %H:%M")
+    start = dt.strptime(start_str, "%Y-%m-%d %H:%M")
+    end = dt.strptime(end_str, "%Y-%m-%d %H:%M")
     
-    now = datetime.now()
+    now = dt.now()
     
     if end < now:
-        return "gone"
+        return "Finalizada"
     
     elif start <= now:
-        return "on going"
+        return "Em andamento"
     
     else:
-        return "scheduled"
+        return "Agendada"
