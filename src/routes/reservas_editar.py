@@ -6,7 +6,7 @@ from utils.validate_reservas import validate_dono, validate_espaco, validate_dat
 
 # Serviços
 from services.espacos import get_all
-from services.reservas import add_reserva
+from services.reservas import get_by_id, update_reserva
 
 # Componentes Personalizados
 from components.navbar import navbar
@@ -17,26 +17,18 @@ from components.form.date_picker import date_picker
 from components.form.time_picker import time_picker
 from components.form.button_filled import button_filled
 
-def reservas_adicionar(page: ft.Page):
-    def is_valid_ref(refs, validate, before=[], params=[], key=""):
-        print()
-        print("Inicio validação de", key)
-
-        print("Verificando se todos os campos anteriores de", key, "são válidos")
+def reservas_editar(page: ft.Page):
+    def is_valid_ref(refs,validate, before=[], params=[]):
         if not all([before]):
-            print("Campos anteriores inválidos")
             return False
         
-        print("Validando", key)
         error = validate(*params) if params != [] else validate(*[ref.value for ref in refs])
         if error is not None:
-            print("Erro de validação de", key, ":", error)
             refs[0].error_text = error
             for ref in refs[1:]:
                 ref.error_text = " "
             return False
         else:
-            print(key, "válido")
             for ref in refs:
                 ref.error_text = None
             return True
@@ -49,25 +41,23 @@ def reservas_adicionar(page: ft.Page):
                 [data_inicio_input, horario_inicio_input],
                 validate_data_hora,
                 [
-                    is_valid_ref([data_inicio_input], validate_data, key="data_inicio"),
-                    is_valid_ref([horario_inicio_input], validate_horario, key="horário_inicio")
-                ],
-                key="inicio"
+                    is_valid_ref([data_inicio_input], validate_data),
+                    is_valid_ref([horario_inicio_input], validate_horario)
+                ]
             ),
             is_valid_ref(
                 [data_termino_input, horario_termino_input],
                 validate_data_hora,
                 [
-                    is_valid_ref([data_termino_input], validate_data, key="data_termino"),
-                    is_valid_ref([horario_termino_input], validate_horario, key="horário_termino")
-                ],
-                key="termino"
+                    is_valid_ref([data_termino_input], validate_data),
+                    is_valid_ref([horario_termino_input], validate_horario)
+                ]
             )
         ],
-        params=[espaco_select.value.split(",")[0], data_inicio_input.value, horario_inicio_input.value, data_termino_input.value, horario_termino_input.value],
-        key="intervalo"
+        params=[espaco_select.value.split(",")[0], data_inicio_input.value, horario_inicio_input.value, data_termino_input.value, horario_termino_input.value, id_ref.current]
     )
 
+    id_ref = ft.Ref[str]()
     is_dono_valid, reset_dono, dono_input = input("Digite o nome do responsável pela reserva", validate_dono)
     is_espaco_valid, reset_espaco, espaco_select = select("Selecione o espaço", lambda: [ft.DropdownOption(f"{espaco['codigo']},{espaco['nome']}", espaco["nome"]) for espaco in get_all()], validate_espaco, handle=lambda e: is_intervalo_valid())
     _, reset_data_inicio, data_inicio_input = date_picker(validate_data, handle=lambda e: is_intervalo_valid())
@@ -75,13 +65,17 @@ def reservas_adicionar(page: ft.Page):
     _, reset_data_termino, data_termino_input = date_picker(validate_data, handle=lambda e: is_intervalo_valid())
     _, reset_horario_termino, horario_termino_input = time_picker(validate_horario, handle=lambda e: is_intervalo_valid())
 
-    def init():
-        reset_dono()
-        reset_espaco()
-        reset_data_inicio()
-        reset_horario_inicio()
-        reset_data_termino()
-        reset_horario_termino()
+    def init(id=None):
+        if id is not None:
+            id_ref.current = id
+
+        reserva = get_by_id(id_ref.current)
+        reset_dono(reserva["dono"])
+        reset_espaco(f"{reserva['codigo-espaco']},{reserva['nome-espaco']}")
+        reset_data_inicio(dt.strptime(reserva["inicio"], "%Y-%m-%d %H:%M").strftime("%d/%m/%Y"))
+        reset_horario_inicio(dt.strptime(reserva["inicio"], "%Y-%m-%d %H:%M").strftime("%H:%M"))
+        reset_data_termino(dt.strptime(reserva["fim"], "%Y-%m-%d %H:%M").strftime("%d/%m/%Y"))
+        reset_horario_termino(dt.strptime(reserva["fim"], "%Y-%m-%d %H:%M").strftime("%H:%M"))
 
         page.update()
 
@@ -91,7 +85,8 @@ def reservas_adicionar(page: ft.Page):
             return
 
         codigo_espaco, nome_espaco = espaco_select.value.split(",")
-        add_reserva(
+        update_reserva(
+            id=id_ref.current,
             codigo_espaco=codigo_espaco,
             nome_espaco=nome_espaco,
             dono=dono_input.value,
@@ -104,7 +99,7 @@ def reservas_adicionar(page: ft.Page):
 
     return init, ft.View(
         controls=[
-            navbar("reservas_adicionar"),
+            navbar("reservas_editar"),
             ft.Container    (
                 ft.Column([
                     ft.Row([
@@ -112,7 +107,7 @@ def reservas_adicionar(page: ft.Page):
                             ft.Icon(ft.Icons.ARROW_BACK_OUTLINED, **styles["header-button"]),
                             on_click=lambda e: page.go("reservas")
                         ),
-                        ft.Text("Adicionar Reserva", **styles["header"]),
+                        ft.Text("Editar Reserva", **styles["header"]),
                     ]),
 
                     ft.Column([label("Dono"), dono_input], **styles["input-field-column"]),

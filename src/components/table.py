@@ -15,7 +15,7 @@ def render_pages(data):
         for i in range(number_of_pages)
     ]
 
-def table(get_data, get_data_parameters, render_data, columns: list, page: ft.Page, on_delete):
+def table(get_data, get_data_parameters, render_data, columns: list, page: ft.Page, on_edit, on_delete):
     global page_number_ref, table_ref, pagination_ref, goto
 
     page_number_ref = ft.Ref[int]() # Armazena o número da página atual
@@ -29,7 +29,7 @@ def table(get_data, get_data_parameters, render_data, columns: list, page: ft.Pa
 
         page_number_ref.current = max(0, min(page_number, get_number_of_pages(data) - 1)) # Atualiza o número da página atual, garantindo que ele esteja entre 0 e o número máximo de páginas
 
-        table_ref.current.rows = render_data(data, page_number_ref.current, rows_per_page, on_delete)
+        table_ref.current.rows = render_data(data, page_number_ref.current, rows_per_page, on_edit, on_delete)
         
         pagination_ref.current.controls = render_pages(data)
         pagination_ref.current.width = min(500, len(pagination_ref.current.controls) * pagination_ref.current.controls[0].width)

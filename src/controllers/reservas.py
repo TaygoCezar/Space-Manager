@@ -68,7 +68,7 @@ def get_reservas(key: str, mode: str) -> list:
 
     return reservas
 
-def render_reservas(reservas, number_of_page, rows_per_page, on_delete) -> list:
+def render_reservas(reservas, number_of_page, rows_per_page, on_edit, on_delete) -> list:
     status_colors = {
         "Finalizada": "#E0E3E8",
         "Em andamento": "#2B6AB1",
@@ -89,7 +89,7 @@ def render_reservas(reservas, number_of_page, rows_per_page, on_delete) -> list:
                 ft.DataCell(ft.Row([ft.Icon(ft.Icons.CIRCLE, color=status_colors[reserva["status"]], tooltip=reserva["status"])], **styles["data-cell-row"])),
                 ft.DataCell(
                     ft.Row([
-                        ft.IconButton(ft.Icons.EDIT),
+                        ft.IconButton(ft.Icons.EDIT, key=reserva["id"], on_click=lambda e: on_edit(e.control.key)),
                         ft.IconButton(ft.Icons.DELETE, key=reserva["id"], on_click=lambda e: on_delete(e.control.key))
                     ], **styles["data-cell-row"])
                 )  

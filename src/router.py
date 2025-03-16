@@ -1,24 +1,12 @@
 import flet as ft
 
 # Páginas do aplicativo
-"""
-    Cada página do aplicativo é uma função que recebe um parâmetro:
-    - page: Página da aplicação, utilizada para realizar navegação.
-    
-    Essa função deverá retornar uma tupla com duas funções:
-    - init: Função executada antes da página ser exibida. A função init pode receber zero ou mais parâmetros.
-        Os parâmetros passados para a função init serão obtidos através da rota passada para a função navigate.
-        Separando a rota e os parâmetros por "#", e cada parâmetro separado por ",".
-        
-        Exemplo:
-            page.go("editar_reserva#1") -> A função navigate irá navegar para página "editar_reserva" e passar o parâmetro "1" para a função init.
 
-    - view: Página a ser exibida.
-"""
 from routes.reservas import reservas
 from routes.espacos import espacos
 from routes.sobre import sobre
 from routes.reservas_adicionar import reservas_adicionar
+from routes.reservas_editar import reservas_editar
 
 def init(p: ft.Page) -> None:
     """Inicialização das páginas da aplicação.
@@ -35,7 +23,8 @@ def init(p: ft.Page) -> None:
         "reservas": reservas(page),
         "espacos": espacos(page),
         "sobre": sobre(page),
-        "reservas_adicionar": reservas_adicionar(page)
+        "reservas_adicionar": reservas_adicionar(page),
+        "reservas_editar": reservas_editar(page)
     }    
     
 def navigate(e: ft.RouteChangeEvent) -> None:
@@ -45,10 +34,15 @@ def navigate(e: ft.RouteChangeEvent) -> None:
         e (RouteChangeEvent): Evento de mudança de rota
     """
 
-    if e.route not in routes:
-        raise ValueError(f"Rota {e.route} não encontrada.")
+    route = e.route.split("?")
+    
+    route_name = route[0]
+    params = {} if len(route) == 1 else dict([param.split("=") for param in route[1].split("&")])
+    
+    if route_name not in routes:
+        raise ValueError(f"Rota {route_name} não encontrada.")
         
     page.views.clear() # Limpa as views da página
-    routes[e.route][0]() # Chama a função init da página
-    page.views.append(routes[e.route][1]) # Adiciona a view da página
+    routes[route_name][0](**params) # Chama a função init da página
+    page.views.append(routes[route_name][1]) # Adiciona a view da página
     page.update() # Atualiza a página

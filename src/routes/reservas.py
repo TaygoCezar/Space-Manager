@@ -21,10 +21,13 @@ def reservas(page: ft.Page):
         render_data=render_reservas,
         columns = [ "CÓDIGO DO ESPAÇO", "ESPAÇO", "DONO", "INÍCIO", "FIM", "ESTADO", ""],
         page=page,
+        on_edit=lambda id: page.go(f"reservas_editar", id=id),
         on_delete=lambda id: open_delete_modal(id, page, lambda: goto_page(0)),
     )
 
     def init():
+        search_ref.current.value = ""
+        dropdown_ref.current.value = "next"
         goto_page(0, False)
 
     return init, ft.View(
