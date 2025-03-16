@@ -3,20 +3,18 @@ import math
 
 rows_per_page = 8
 
-def get_number_of_pages(data):
-    number_of_rows = len(data)
-    return max(1, math.ceil(number_of_rows / rows_per_page))
-
-def render_pages(data):
-    number_of_pages = get_number_of_pages(data)
-
-    return [
-        ft.Container(ft.Text(i+1, **styles["pagination-text"]), key=i, bgcolor="#E1E1E1" if i == page_number_ref.current else "transparent", on_click=lambda e: goto(e.control.key), **styles["pagination-button"])
-        for i in range(number_of_pages)
-    ]
-
 def table(get_data, get_data_parameters, render_data, columns: list, page: ft.Page, on_edit, on_delete):
-    global page_number_ref, table_ref, pagination_ref, goto
+    def get_number_of_pages(data):
+        number_of_rows = len(data)
+        return max(1, math.ceil(number_of_rows / rows_per_page))
+
+    def render_pages(data):
+        number_of_pages = get_number_of_pages(data)
+
+        return [
+            ft.Container(ft.Text(i+1, **styles["pagination-text"]), key=i, bgcolor="#E1E1E1" if i == page_number_ref.current else "transparent", on_click=lambda e: goto(e.control.key), **styles["pagination-button"])
+            for i in range(number_of_pages)
+        ]
 
     page_number_ref = ft.Ref[int]() # Armazena o número da página atual
     page_number_ref.current = 0

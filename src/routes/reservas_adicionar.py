@@ -23,6 +23,7 @@ def reservas_adicionar(page: ft.Page):
         print("Inicio validação de", key)
 
         print("Verificando se todos os campos anteriores de", key, "são válidos")
+        print
         if not all([before]):
             print("Campos anteriores inválidos")
             return False
@@ -69,7 +70,7 @@ def reservas_adicionar(page: ft.Page):
     )
 
     is_dono_valid, reset_dono, dono_input = input("Digite o nome do responsável pela reserva", validate_dono)
-    is_espaco_valid, reset_espaco, espaco_select = select("Selecione o espaço", lambda: [ft.DropdownOption(f"{espaco['codigo']},{espaco['nome']}", espaco["nome"]) for espaco in get_all()], validate_espaco, handle=lambda e: is_intervalo_valid())
+    is_espaco_valid, reset_espaco, espaco_select = select("Selecione o espaço", lambda: [ft.DropdownOption(f"{espaco['codigo']},{espaco['nome']}", f"{espaco['codigo']} - {espaco['nome']}") for espaco in get_all()], validate_espaco, handle=lambda e: is_intervalo_valid())
     _, reset_data_inicio, data_inicio_input = date_picker(validate_data, handle=lambda e: is_intervalo_valid())
     _, reset_horario_inicio, horario_inicio_input = time_picker(validate_horario, handle=lambda e: is_intervalo_valid())
     _, reset_data_termino, data_termino_input = date_picker(validate_data, handle=lambda e: is_intervalo_valid())

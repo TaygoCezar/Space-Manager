@@ -42,7 +42,7 @@ def save_reservas(reservas: list[dict]) -> None:
     """
     
     with open(caminho, "w", encoding="utf-8") as arquivo:
-        arquivo.write(",".join(campos)+"\n") # -> "id,codigo-espaco,nome-espaco,dono,inicio,fim\n"
+        arquivo.write(",".join(campos)+"\n")
 
         for reserva in reservas:
             arquivo.write(",".join(reserva.values())+"\n")

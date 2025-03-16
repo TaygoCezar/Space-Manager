@@ -94,7 +94,7 @@ def reservas_editar(page: ft.Page):
             fim=f"{dt.strptime(data_termino_input.value, "%d/%m/%Y").strftime("%Y-%m-%d")} {horario_termino_input.value}"
         )
 
-        page.open(ft.SnackBar(ft.Text("Reserva salva com sucesso!"), duration=1000)),
+        page.open(ft.SnackBar(ft.Text("Edição da reserva salva com sucesso!"), duration=1000)),
         init()
 
     return init, ft.View(

@@ -9,7 +9,7 @@ from controllers.reservas import get_reservas, render_reservas
 # Componentes Personalizados
 from components.navbar import navbar
 from components.table import table
-from components.delete_modal import open_delete_modal
+from components.delete_reserva_modal import open_delete_modal
 
 def reservas(page: ft.Page):
     dropdown_ref = ft.Ref[ft.DropdownM2]()
@@ -19,7 +19,7 @@ def reservas(page: ft.Page):
         get_data=get_reservas,
         get_data_parameters={"key": search_ref, "mode": dropdown_ref},
         render_data=render_reservas,
-        columns = [ "CÓDIGO DO ESPAÇO", "ESPAÇO", "DONO", "INÍCIO", "FIM", "ESTADO", ""],
+        columns = ["CÓDIGO DO ESPAÇO", "ESPAÇO", "DONO", "INÍCIO", "FIM", "ESTADO", ""],
         page=page,
         on_edit=lambda id: page.go(f"reservas_editar", id=id),
         on_delete=lambda id: open_delete_modal(id, page, lambda: goto_page(0)),

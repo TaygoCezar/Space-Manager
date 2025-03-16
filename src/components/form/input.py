@@ -1,10 +1,10 @@
 import flet as ft
 
-def input(hint, validate):
+def input(hint, validate, validate_params={}):
     input_ref = ft.Ref[ft.TextField]()
 
     def is_valid():
-        error = validate(input_ref.current.value)
+        error = validate(input_ref.current.value, **validate_params)
         input_ref.current.error_text = error
         return error is None
 
