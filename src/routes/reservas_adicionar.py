@@ -18,26 +18,17 @@ from components.form.time_picker import time_picker
 from components.form.button_filled import button_filled
 
 def reservas_adicionar(page: ft.Page):
-    def is_valid_ref(refs, validate, before=[], params=[], key=""):
-        print()
-        print("Inicio validação de", key)
-
-        print("Verificando se todos os campos anteriores de", key, "são válidos")
-        print
-        if not all([before]):
-            print("Campos anteriores inválidos")
+    def is_valid_ref(refs, validate, before=[], params=[]):
+        if not all(before):
             return False
         
-        print("Validando", key)
         error = validate(*params) if params != [] else validate(*[ref.value for ref in refs])
         if error is not None:
-            print("Erro de validação de", key, ":", error)
             refs[0].error_text = error
             for ref in refs[1:]:
                 ref.error_text = " "
             return False
         else:
-            print(key, "válido")
             for ref in refs:
                 ref.error_text = None
             return True
@@ -50,23 +41,20 @@ def reservas_adicionar(page: ft.Page):
                 [data_inicio_input, horario_inicio_input],
                 validate_data_hora,
                 [
-                    is_valid_ref([data_inicio_input], validate_data, key="data_inicio"),
-                    is_valid_ref([horario_inicio_input], validate_horario, key="horário_inicio")
-                ],
-                key="inicio"
+                    is_valid_ref([data_inicio_input], validate_data),
+                    is_valid_ref([horario_inicio_input], validate_horario)
+                ]
             ),
             is_valid_ref(
                 [data_termino_input, horario_termino_input],
                 validate_data_hora,
                 [
-                    is_valid_ref([data_termino_input], validate_data, key="data_termino"),
-                    is_valid_ref([horario_termino_input], validate_horario, key="horário_termino")
-                ],
-                key="termino"
+                    is_valid_ref([data_termino_input], validate_data),
+                    is_valid_ref([horario_termino_input], validate_horario)
+                ]
             )
         ],
         params=[espaco_select.value.split(",")[0], data_inicio_input.value, horario_inicio_input.value, data_termino_input.value, horario_termino_input.value],
-        key="intervalo"
     )
 
     is_dono_valid, reset_dono, dono_input = input("Digite o nome do responsável pela reserva", validate_dono)

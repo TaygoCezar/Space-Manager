@@ -15,6 +15,7 @@ def espacos(page: ft.Page):
     search_ref = ft.Ref[ft.TextField]()
 
     def init():
+        search_ref.current.value = ""
         goto_page(0, False)
 
     goto_page, table_component = table(

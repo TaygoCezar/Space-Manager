@@ -4,7 +4,7 @@ def validate_nome(nome):
     if nome == "":
         return "O campo 'Nome' é obrigatório"
     
-def validate_codigo(codigo, exclude_codigo):
+def validate_codigo(codigo, exclude_codigo=None):
     if codigo == "":
         return "O campo 'Código' é obrigatório"
     

@@ -5,7 +5,6 @@ from services.espacos import get_all
 from utils.search import prefix_check
 
 def search(espacos: list, key: str) -> list:
-    
     def f(espaco: dict) -> bool:
         for values in espaco.values():
             if prefix_check(values, key):

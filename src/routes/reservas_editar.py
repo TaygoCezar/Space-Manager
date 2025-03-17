@@ -19,7 +19,7 @@ from components.form.button_filled import button_filled
 
 def reservas_editar(page: ft.Page):
     def is_valid_ref(refs,validate, before=[], params=[]):
-        if not all([before]):
+        if not all(before):
             return False
         
         error = validate(*params) if params != [] else validate(*[ref.value for ref in refs])
