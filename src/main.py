@@ -1,5 +1,5 @@
 import flet as ft
-import roteador
+import router
 
 
 def main(page: ft.Page) -> None:
@@ -23,8 +23,8 @@ def main(page: ft.Page) -> None:
         "Saira Extra Condensed - Bold": "/fonts/SairaExtraCondensed-Bold.ttf"
     }
 
-    roteador.inicializar(page)
-    page.on_route_change = roteador.ao_navegar
+    router.init(page)
+    page.on_route_change = router.handle_navigation
     page.go("espacos")
 
 
