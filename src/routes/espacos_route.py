@@ -1,31 +1,47 @@
-import sys, pathlib
-sys.path.insert(0, pathlib.Path(__file__).parent.parent)
-
 import flet as ft
 
 #controllers
-from controllers.espacos import get_espacos, render_espacos
+from controllers.espacos_controller import get_espacos_by_key
 
 # Componentes Personalizados
 from components.navbar import navbar
-from components.table import table
-from components.delete_espaco_modal import open_delete_modal
+from components.table.table import table
+from components.espacos.espacos_table_row import espacos_table_row
 
 def espacos(page: ft.Page):
+    """Página Espaços
+    
+    Página com a lista de espaços cadastrados.
+
+    Args:
+        page (ft.Page): Página atual
+
+    Returns:
+        function: Função de inicialização
+        ft.View: Página Espaços
+    """
+    # Referências
     search_ref = ft.Ref[ft.TextField]()
 
+    # Inicialização
     def init():
         search_ref.current.value = ""
-        goto_page(0, False)
+        update_table()
 
-    goto_page, table_component = table(
-        get_data=get_espacos,
-        get_data_parameters={"key": search_ref},
-        render_data=render_espacos,
-        columns = ["CÓDIGO", "NOME", ""],
+    # Eventos
+    def add_espaco(e: ft.TapEvent):
+        page.go("espacos_adicionar")
+
+    def search_espacos(e: ft.ControlEvent):
+        update_table()
+
+    # Componentes
+    update_table, table_component = table(
         page=page,
-        on_edit=lambda codigo: page.go(f"espacos_editar", codigo=codigo),
-        on_delete=lambda codigo: open_delete_modal(codigo, page, lambda: goto_page(0)),
+        get_data=get_espacos_by_key,
+        get_data_parameters={"key": search_ref},
+        columns=["CÓDIGO", "NOME", ""],
+        row=espacos_table_row
     )
 
     return init, ft.View(
@@ -38,8 +54,8 @@ def espacos(page: ft.Page):
 
                     # Controles
                     ft.Row([
-                        ft.FilledButton("Adicionar Espaço", "add", on_click=lambda e: page.go("espacos_adicionar"), **styles["filled-button"]),
-                        ft.TextField(ref=search_ref, hint_text="Buscar", on_change=lambda e: goto_page(0), **styles["search"])
+                        ft.FilledButton("Adicionar Espaço", "add", on_click=add_espaco, **styles["filled-button"]),
+                        ft.TextField(ref=search_ref, hint_text="Buscar", on_change=search_espacos, **styles["search"])
                     ]),
                     
                     table_component
@@ -51,6 +67,7 @@ def espacos(page: ft.Page):
         **styles["body"],
     )
 
+# Estilos
 styles = {
     "body": {
         "padding": ft.padding.all(0),

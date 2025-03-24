@@ -5,8 +5,8 @@ import router
 def main(page: ft.Page) -> None:
     """Inicializa a aplicação.
     """
-        
     router.init(page)
+
     page.window.min_width = 1200
     page.window.min_height = 800
 

@@ -1,15 +1,27 @@
-import sys, pathlib
-sys.path.insert(0, pathlib.Path(__file__).parent.parent)
-
 import flet as ft
 
 # Componentes Personalizados
 from components.navbar import navbar
 
+
 def sobre(page: ft.Page):
+    """Página Sobre
+    
+    Página com informações sobre o projeto e os integrantes.
+
+    Args:
+        page (ft.Page): Página atual
+
+    Returns:
+        function: Função de inicialização
+        ft.View: Página Sobre
+    """
+
+    # Inicialização
     def init():
         pass
 
+    # Página
     return init, ft.View(
         controls=[
             navbar("sobre"),
@@ -83,6 +95,8 @@ def sobre(page: ft.Page):
         **styles["body"]
     )
 
+
+# Estilos
 styles = {
     "body": {
         "padding": ft.padding.all(0),

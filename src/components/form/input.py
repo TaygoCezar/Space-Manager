@@ -1,29 +1,36 @@
+import typing as tp
 import flet as ft
 
-def input(hint, validate, validate_params={}):
-    input_ref = ft.Ref[ft.TextField]()
 
-    def is_valid():
-        error = validate(input_ref.current.value, **validate_params)
-        input_ref.current.error_text = error
-        return error is None
+def input(hint: str, ref: ft.Ref|None = None, on_change_blur: tp.Callable = lambda: None) -> ft.TextField:
+    """Componente de input.
 
-    def reset(value=""):
-        input_ref.current.value = value
-        input_ref.current.error_text = None
+    Args:
+        hint (str): Texto de dica.
+        ref (ft.Ref, optional): Referência do input. Defaults to None.
+        on_change_blur (tp.Callable, optional): Função de mudança. Defaults to lambda: None.
 
-    def handle_input(e):
-        is_valid()
-        e.control.page.update()
+    Returns:
+        ft.TextField: Input.
+    """
+    # Referências
+    input_ref = ft.Ref[ft.TextField]() if ref is None else ref
 
-    return is_valid, reset, ft.TextField(
+    # Eventos
+    def handle_change_blur(e: ft.ControlEvent):
+        on_change_blur()
+
+    # Componente
+    return ft.TextField(
         ref=input_ref,
         hint_text=hint,
-        on_blur=handle_input,
-        on_change=handle_input,
+        on_blur=handle_change_blur,
+        on_change=handle_change_blur,
         **styles["input"]
     )
 
+
+# Estilos
 styles = {
     "input": {
         "color": "#003565", 
