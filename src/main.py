@@ -8,6 +8,13 @@ def main(page: ft.Page) -> None:
     Args:
         page (ft.Page): Objeto da página.
     """
+<<<<<<< HEAD
+=======
+    router.init(page)
+
+    page.window.min_width = 1200
+    page.window.min_height = 800
+>>>>>>> stable
 
     page.title = "Space Manager"
     page.theme_mode = "light"
