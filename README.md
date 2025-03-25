@@ -33,7 +33,7 @@ Space Manager é uma aplicação para gestão de espaços. Onde é possível cad
 Clone o projeto
 
 ```bash
-  git clone https://link-para-o-projeto
+  git clone https://github.com/TaygoCezar/Space-Manager.git
 ```
 
 Entre no diretório do projeto
@@ -59,3 +59,4 @@ Inicie o aplicativo
 - [@nathil](https://www.github.com/nathil)
 - [@PedroMends30](https://www.github.com/PedroMends30)
 - [@TaygoCezar](https://www.github.com/TaygoCezar)
+

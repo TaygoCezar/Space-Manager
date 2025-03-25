@@ -35,7 +35,7 @@ def save_reservas(reservas: list[Reserva]) -> None:
     """
     create_reservas_file() # Cria o arquivo, apagando o conteúdo existente
 
-    with open(caminho, "w", encoding="utf-8") as arquivo: # Abre o arquivo para escrita
+    with open(caminho, "a", encoding="utf-8") as arquivo: # Abre o arquivo para escrita
         for reserva in reservas:
             arquivo.write(",".join(reserva.values())+"\n") # Escreve cada reserva no arquivo, separando os valores por vírgula e adicionando uma quebra de linha no final
 

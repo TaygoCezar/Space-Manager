@@ -1,5 +1,3 @@
-import flet as ft
-
 # Servicos
 from services.espacos_service import Espaco, get_all_espacos
 
