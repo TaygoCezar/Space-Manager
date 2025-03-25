@@ -1,34 +1,51 @@
-import sys, pathlib
-sys.path.insert(0, pathlib.Path(__file__).parent.parent)
-
 import flet as ft
 
 # Controladores
-from controllers.reservas import get_reservas, render_reservas
+from controllers.reservas_controller import get_reservas_by_key_and_mode
 
 # Componentes Personalizados
 from components.navbar import navbar
-from components.table import table
-from components.delete_reserva_modal import open_delete_modal
+from components.table.table import table
+from components.reservas.reservas_table_row import reservas_table_row
+
 
 def reservas(page: ft.Page):
+    """Página Reservas
+
+    Página com a lista de reservas cadastradas.
+
+    Args:
+        page (ft.Page): Página atual
+
+    Returns:
+        function: Função de inicialização
+        ft.View: Página Reservas
+    """
+    # Referências
     dropdown_ref = ft.Ref[ft.DropdownM2]()
     search_ref = ft.Ref[ft.TextField]()
 
-    goto_page, table_component = table(
-        get_data=get_reservas,
-        get_data_parameters={"key": search_ref, "mode": dropdown_ref},
-        render_data=render_reservas,
-        columns = ["CÓDIGO DO ESPAÇO", "ESPAÇO", "DONO", "INÍCIO", "FIM", "ESTADO", ""],
-        page=page,
-        on_edit=lambda id: page.go(f"reservas_editar", id=id),
-        on_delete=lambda id: open_delete_modal(id, page, lambda: goto_page(0)),
-    )
-
+    # Inicialização
     def init():
         search_ref.current.value = ""
         dropdown_ref.current.value = "next"
-        goto_page(0, False)
+        update_table()
+
+    # Eventos
+    def add_reserva(e: ft.TapEvent):
+        page.go("reservas_adicionar")
+
+    def search_reservas(e: ft.ControlEvent):
+        update_table()
+
+    # Componentes
+    update_table, table_component = table(
+        page=page,
+        get_data=get_reservas_by_key_and_mode,
+        get_data_parameters={"key": search_ref, "mode": dropdown_ref},
+        columns=["CÓDIGO DO ESPAÇO", "ESPAÇO", "DONO", "INÍCIO", "FIM", "ESTADO", ""],
+        row=reservas_table_row
+    )
 
     return init, ft.View(
         controls=[
@@ -41,7 +58,7 @@ def reservas(page: ft.Page):
 
                     # Controles
                     ft.Row([
-                        ft.FilledButton("Adicionar Reserva", "add", on_click=lambda e: page.go("reservas_adicionar"), **styles["filled-button"]),
+                        ft.FilledButton("Adicionar Reserva", "add", on_click=add_reserva, **styles["filled-button"]),
                         ft.DropdownM2(
                             ref=dropdown_ref,
                             options=[
@@ -49,10 +66,10 @@ def reservas(page: ft.Page):
                                 ft.DropdownOption("all", "Mostrar todos")                                
                             ],
                             value="next",
-                            on_change=lambda e: goto_page(0),
+                            on_change=search_reservas,
                             **styles["dropdown"]
                         ),
-                        ft.TextField(ref=search_ref, hint_text="Buscar", on_change=lambda e: goto_page(0), **styles["search"])
+                        ft.TextField(ref=search_ref, hint_text="Buscar", on_change=search_reservas, **styles["search"])
                     ]),
 
                     table_component
@@ -63,6 +80,8 @@ def reservas(page: ft.Page):
         **styles["body"]
     )
 
+
+# Estilos
 styles = {
     "body": {
         "padding": ft.padding.all(0),

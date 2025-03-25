@@ -1,10 +1,14 @@
+import typing as tp
 import flet as ft
 
-# Validar dados
-from utils.validate_espacos import validate_nome, validate_codigo
-
 # Serviços
-from services.espacos import add_espaco
+from services.espacos_service import add_espaco
+
+# Controllers
+from controllers.espacos_controller import validate_nome, validate_codigo
+
+# Utils
+from utils.validation_util import validate_ref
 
 #Componentes Personalizados
 from components.navbar import navbar 
@@ -12,25 +16,48 @@ from components.form.button_filled import button_filled
 from components.form.label import label
 from components.form.input import input
 
-def espacos_adicionar(page: ft.Page): 
-    is_nome_valid, reset_nome, nome_input = input("Digite o nome do espaço", validate_nome)
-    is_codigo_valid, reset_codigo, codigo_input = input("Digite o código do espaço", validate_codigo)
 
+def espacos_adicionar(page: ft.Page) -> tuple[tp.Callable, ft.View]:
+    """Página de adicionar espaço
+
+    Página para adicionar um novo espaço.
+
+    Args:
+        page (ft.Page): Página atual
+
+    Returns:
+        Callable: Função de inicialização
+        ft.View: Página de adicionar espaço
+    """
+    # Inicialização
     def init():
-        reset_nome()
-        reset_codigo()
+        for ref in [nome_ref, codigo_ref]:
+            ref.current.value = ""
+            ref.current.error_text = None
         
         page.update()
     
-    def handle_save(e):
-        if not all([is_nome_valid(), is_codigo_valid()]):
+    # Referências
+    nome_ref = ft.Ref[ft.TextField]()
+    codigo_ref = ft.Ref[ft.TextField]()
+
+    # Validações
+    check_nome = validate_ref([nome_ref], validate_nome, [nome_ref])
+    check_codigo = validate_ref([codigo_ref], validate_codigo, [codigo_ref])
+    
+    # Eventos
+    def save(e: ft.TapEvent):
+        """Salva o espaço
+        """
+        if not all([check_nome(), check_codigo()]):
             page.update()
             return
         
-        add_espaco(codigo_input.value, nome_input.value)
+        add_espaco(codigo_ref.current.value, nome_ref.current.value)
         page.open(ft.SnackBar(ft.Text("Espaço salvo com sucesso!"), duration=1000))
-        init() 
-        
+        init()
+
+    # Componentes
     return init, ft.View(
         controls=[
             navbar("espacos_adicionar"),
@@ -44,10 +71,10 @@ def espacos_adicionar(page: ft.Page):
                         ft.Text("Adicionar Espaço", **styles["header"]),
                     ]),
 
-                    ft.Column([label("Nome"), nome_input], **styles["input-field-column"]),
-                    ft.Column([label("Código"), codigo_input], **styles["input-field-column"]),
+                    ft.Column([label("Nome"), input("Digite o nome do espaço", nome_ref, check_nome)], **styles["input-field-column"]),
+                    ft.Column([label("Código"), input("Digite o código do espaço", codigo_ref, check_codigo)], **styles["input-field-column"]),
                     
-                    ft.Row([button_filled("Salvar", ft.Icons.SAVE, handle_save)], **styles["right-row"])
+                    ft.Row([button_filled("Salvar", ft.Icons.SAVE, save)], **styles["right-row"])
 
                 ], **styles["main-row"]),
                 **styles["main-container"]
@@ -56,6 +83,8 @@ def espacos_adicionar(page: ft.Page):
         **styles["body"]
     )
 
+
+# Estilos
 styles = {
     "body": {
         "padding": ft.padding.all(0),

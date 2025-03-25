@@ -1,25 +1,26 @@
+import typing as td
 import flet as ft
 
-def select(hint, render_options, validate, handle=None):
-    dropdown_ref = ft.Ref[ft.DropdownM2]()
 
-    def is_valid():
-        error = validate(dropdown_ref.current.value)
-        dropdown_ref.current.error_text = error
-        return error is None
-    
-    def reset(value=""):
-        dropdown_ref.current.value = value
-        dropdown_ref.current.error_text = None
-        dropdown_ref.current.options = render_options()
+def select(hint: str, ref: ft.Ref|None = None, on_change_blur: td.Callable = lambda: None) -> ft.DropdownM2:
+    """Componente de select.
 
-    def handle_input(e):
-        is_valid()
-        if handle:
-            handle(e)
-        e.control.page.update()
-        
-    return is_valid, reset, ft.DropdownM2(
+    Args:
+        hint (str): Texto de dica.
+        ref (ft.Ref, optional): Referência do select. Defaults to None.
+        on_change (td.Callable, optional): Função de mudança. Defaults to lambda: None.
+
+    Returns:
+        ft.DropdownM2: Select.
+    """
+    # Referências
+    dropdown_ref = ft.Ref[ft.DropdownM2]() if ref is None else ref
+
+    # Eventos
+    def handle_input(e: ft.ControlEvent):
+        on_change_blur()
+
+    return ft.DropdownM2(
         ref=dropdown_ref,
         hint_content=ft.Text(hint, **styles["select-hint"]),
         on_blur=handle_input,
@@ -27,6 +28,8 @@ def select(hint, render_options, validate, handle=None):
         **styles["select"]
     )
 
+
+# Estilos
 styles = {
     "select": {
         "width": float("inf"),

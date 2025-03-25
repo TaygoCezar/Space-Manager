@@ -1,18 +1,36 @@
-import sys, pathlib
-sys.path.insert(0, pathlib.Path(__file__).parent.parent)
-
+import typing as tp
 import flet as ft
 
 # Servicos
-from services.espacos import delete_espaco
+from services.espacos_service import delete_espaco
 
-def delete_modal(codigo, page, callback):
-    def handle_delete(e):
+
+def delete_espaco_modal(codigo: str, update_table: tp.Callable) -> ft.AlertDialog:
+    """Modal para deletar um espaço.
+
+    Args:
+        codigo (str): Código do espaço.
+        update_table (Callable): Função para atualizar a tabela de espaços.
+
+    Returns:
+        AlertDialog: Modal de confirmação
+    """
+    # Referências
+    modal_ref = ft.Ref[ft.AlertDialog]()
+
+    # Eventos
+    def close_modal(e):
+        e.control.page.close(modal_ref.current)
+
+    def delete(e):
         delete_espaco(e.control.data)
-        page.close(modal)
-        callback()
+        close_modal(e)
+        update_table()
+        e.control.page.open(ft.SnackBar(ft.Text("Espaço deletado com sucesso!"), duration=1000))
 
+    # Componente
     return ft.AlertDialog(
+        ref=modal_ref,
         modal=True,
         title=ft.Text("Deletar Reserva", **styles["title"]),
         content=ft.Column([
@@ -20,17 +38,13 @@ def delete_modal(codigo, page, callback):
             ft.Text("(Esta ação também deletará todas as reservas cadastradas neste espaço!)", **styles["description-warning"])
         ], **styles["modal-column"]),
         actions=[
-            ft.FilledButton("Cancelar", on_click=lambda e: page.close(modal), **styles["filled-button"]),
-            ft.FilledButton("Deletar", data=codigo, on_click=handle_delete, **styles["filled-button"])
+            ft.FilledButton("Cancelar", on_click=close_modal, **styles["filled-button"]),
+            ft.FilledButton("Deletar", data=codigo, on_click=delete, **styles["filled-button"])
         ]
     )
 
-def open_delete_modal(codigo: str, page: ft.Page, callback):
-    global modal
 
-    modal = delete_modal(codigo, page, callback)
-    page.open(modal)
-
+# Estilos
 styles = {
     "modal-column": {
         "tight": True,
